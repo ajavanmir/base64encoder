@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+<body>
+    <form enctype="multipart/form-data">
+        <input type="file" name="file" id="file"/>
+    </form>
+    <script>
+    function createBase64(eventEl,fileType = []) {
+        return new Promise(function(resolve, reject) {
+            let reader = new FileReader();
+            function handleEvent(event, file, reader) {
+                let listType = fileType;
+                let indexFind = null;
+                if (fileType.length > 0) {
+                    const fileExtension = getFileExtension(file.name);
+                    indexFind = listType.findIndex(function(item) {
+                        return item === fileExtension.toLowerCase();
+                    });
+                }
+                if (event.type === "loadend" && (indexFind !== -1 || !indexFind)) {
+                    resolve(reader.result);
+                } else {
+                    reject(false);
+                }
+            }
+
+            function handleSelected(e) {
+                const selectedFile = e.target.files[0];
+                if (selectedFile) {
+                    addListeners(reader, selectedFile);
+                    reader.readAsDataURL(selectedFile);
+                }
+            }
+
+            function addListeners(reader, selectedFile) {
+                reader.onloadend = function(event) {
+                    handleEvent(event, selectedFile, reader);
+                };
+            }
+
+            function getFileExtension(filename) {
+                return filename.split('.').pop();
+            }
+            handleSelected(eventEl);    
+        });
+    }
+
+    $("#file").on("change", function(event) {
+        createBase64(event,["png"]).then(function(value) {
+            console.log(value);
+        }).catch(function(error) {
+            console.log(error);
+        });
+    });
+
+    
+
+    </script>
+</body>
+</html>
